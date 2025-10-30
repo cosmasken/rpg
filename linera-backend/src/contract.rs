@@ -90,6 +90,21 @@ impl Contract for RpgGameContract {
                     linera_sdk::log::error!("Failed to save inventory to blockchain for player {}: {}", player_id, e);
                 }
             }
+            RpgGameOperation::SaveQuests { player_id, quests } => {
+                // Parse the quests JSON string into the proper structure
+                let quests_data: Vec<crate::state::QuestData> = 
+                    match serde_json::from_str(&quests) {
+                        Ok(data) => data,
+                        Err(e) => {
+                            linera_sdk::log::error!("Failed to parse quests JSON for player {}: {}", player_id, e);
+                            return; // Exit the operation early if JSON parsing fails
+                        }
+                    };
+                
+                if let Err(e) = self.state.player_quests.insert(&player_id, quests_data).await {
+                    linera_sdk::log::error!("Failed to save quests to blockchain for player {}: {}", player_id, e);
+                }
+            }
         }
     }
 

@@ -189,4 +189,60 @@ mod tests {
         assert_eq!(player_data.strength, 15);
         assert_eq!(player_data.max_health, 120);
     }
+
+    #[test]
+    fn test_quest_storage() {
+        let mut runtime = linera_sdk::ContractRuntime::new();
+        runtime.set_application_parameters(());
+        
+        let mut contract = RpgGameContract {
+            state: RpgGameState::load(runtime.root_view_storage_context())
+                .blocking_wait()
+                .expect("Failed to read from mock key value store"),
+            runtime,
+        };
+
+        // Instantiate the contract
+        contract
+            .instantiate(())
+            .now_or_never()
+            .expect("Instantiation should not await anything");
+
+        // Create test quests
+        let player_id = "quest_test_player".to_string();
+        let quests = vec![
+            crate::state::QuestData {
+                id: "quest_001".to_string(),
+                title: "Save the Village".to_string(),
+                text: "Kill 10 goblins to save the village".to_string(),
+                completed: false,
+                progress: 0,
+            }
+        ];
+        let quests_json = serde_json::to_string(&quests).unwrap();
+
+        let operation = RpgGameOperation::SaveQuests {
+            player_id: player_id.clone(),
+            quests: quests_json,
+        };
+
+        // Execute the operation
+        contract
+            .execute_operation(operation)
+            .now_or_never()
+            .expect("Quest operation execution should not await anything");
+
+        // Verify the state was saved
+        let quests_data = contract
+            .state
+            .player_quests
+            .get(&player_id)
+            .now_or_never()
+            .expect("Get should not await anything")
+            .expect("Quest data should exist");
+
+        assert_eq!(quests_data.len(), 1);
+        assert_eq!(quests_data[0].id, "quest_001");
+        assert_eq!(quests_data[0].title, "Save the Village");
+    }
 }

@@ -26,6 +26,7 @@ The contract supports the following operations:
 
 - `SavePlayerState`: Saves player statistics to the blockchain
 - `SaveInventory`: Saves player inventory to the blockchain
+- `SaveQuests`: Saves player quests to the blockchain
 
 ## Queries
 
@@ -33,6 +34,7 @@ The service provides the following queries:
 
 - `playerState(player_id)`: Retrieves player statistics
 - `inventory(player_id)`: Retrieves player inventory
+- `quests(player_id)`: Retrieves player quests
 
 ## Features
 

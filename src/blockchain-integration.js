@@ -205,6 +205,66 @@ export const blockchain_integration = (() => {
       }
     }
 
+    /**
+     * Save quests to the blockchain
+     * @param {string} playerId - Unique identifier for the player
+     * @param {Array} quests - Array of quest objects
+     */
+    async saveQuests(playerId, quests) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot save quests');
+        return false;
+      }
+
+      try {
+        // Convert quests to a format suitable for GraphQL
+        const questsJson = JSON.stringify(quests);
+        const mutation = `mutation { 
+          saveQuests(
+            playerId: "${playerId}",
+            quests: ${JSON.stringify(questsJson)}
+          ) 
+        }`;
+
+        const response = await this._application.query(`{ "query": "${mutation}" }`);
+        console.log('Quests saved to blockchain:', response);
+        return true;
+      } catch (error) {
+        console.error('Error saving quests to blockchain:', error);
+        return false;
+      }
+    }
+
+    /**
+     * Load quests from the blockchain
+     * @param {string} playerId - Unique identifier for the player
+     */
+    async loadQuests(playerId) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot load quests');
+        return null;
+      }
+
+      try {
+        const query = `query { 
+          quests(playerId: "${playerId}") 
+        }`;
+
+        const response = await this._application.query(`{ "query": "${query}" }`);
+        const parsedResponse = JSON.parse(response);
+        if (parsedResponse.errors) {
+          console.error('GraphQL errors:', parsedResponse.errors);
+          return null;
+        }
+        const data = parsedResponse.data.quests;
+        console.log('Quests loaded from blockchain:', data);
+        return data;
+      } catch (error) {
+        console.error('Error loading quests from blockchain:', error);
+        return null;
+      }
+    }
+
     get isConnected() {
       return this._isConnected;
     }

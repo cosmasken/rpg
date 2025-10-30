@@ -28,6 +28,11 @@ pub enum RpgGameOperation {
         player_id: String,
         inventory: String,  // JSON string of inventory
     },
+    /// Save quests to the blockchain
+    SaveQuests {
+        player_id: String,
+        quests: String,  // JSON string of quests
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize)]

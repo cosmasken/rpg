@@ -38,6 +38,7 @@ RPG/
 
 - Player state persistence on the blockchain
 - Inventory tracking with flexible schema
+- Quest tracking with progress persistence
 - Battle result recording
 - Level progression tracking
 - Web3 integration for true ownership
@@ -102,6 +103,7 @@ The backend follows Linera best practices:
 - ✅ Blockchain integration
 - ✅ Player state persistence
 - ✅ Inventory management
+- ✅ Quest system persistence
 - ✅ Error handling
 - ✅ Unit tests
 - 🔄 Cross-chain functionality (in progress)

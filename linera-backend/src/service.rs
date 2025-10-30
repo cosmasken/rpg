@@ -78,6 +78,22 @@ impl QueryRoot {
             None => None,
         }
     }
+
+    async fn quests(&self, player_id: String) -> Option<String> {
+        let quests = self.state.player_quests.get(&player_id).await
+            .expect("Failed to get quests");
+        
+        match quests {
+            Some(quest_list) => {
+                // Convert quests to JSON string
+                match serde_json::to_string(&quest_list) {
+                    Ok(json_str) => Some(json_str),
+                    Err(_) => None,
+                }
+            },
+            None => None,
+        }
+    }
 }
 
 struct MutationRoot {
@@ -119,6 +135,16 @@ impl MutationRoot {
         inventory: String,  // JSON string
     ) -> [u8; 0] {
         let operation = RpgGameOperation::SaveInventory { player_id, inventory };
+        self.runtime.schedule_operation(&operation);
+        []
+    }
+
+    async fn save_quests(
+        &self,
+        player_id: String,
+        quests: String,  // JSON string
+    ) -> [u8; 0] {
+        let operation = RpgGameOperation::SaveQuests { player_id, quests };
         self.runtime.schedule_operation(&operation);
         []
     }

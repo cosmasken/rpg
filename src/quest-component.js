@@ -18,19 +18,67 @@ export const quest_component = (() => {
       this._RegisterHandler('input.picked', (m) => this._OnPicked(m));
     }
 
-    _OnPicked(msg) {
+    async _OnPicked(msg) {
       // HARDCODE A QUEST
       const quest = {
         id: 'foo',
         title: _TITLE,
         text: _TEXT,
+        completed: false,
+        progress: 0,
       };
+      
+      // Try to save to blockchain if available
+      const blockchainManager = this.GetComponent('BlockchainManager');
+      if (blockchainManager && blockchainManager.isConnected) {
+        // Try to load existing quests first
+        const existingQuests = await blockchainManager.loadQuests(this._parent.Name) || [];
+        const updatedQuests = [...existingQuests, quest];
+        
+        // Save updated quests to blockchain (fire and forget)
+        blockchainManager.saveQuests(this._parent.Name, updatedQuests).catch(err => {
+          console.error('Failed to save quests to blockchain:', err);
+        });
+      }
+      
       this._AddQuestToJournal(quest);
     }
 
     _AddQuestToJournal(quest) {
       const ui = this.FindEntity('ui').GetComponent('UIController');
       ui.AddQuest(quest);
+    }
+    
+    // Method to update quest progress
+    async UpdateQuestProgress(questId, progress, completed = false) {
+      const ui = this.FindEntity('ui').GetComponent('UIController');
+      
+      // Try to save to blockchain if available
+      const blockchainManager = this.GetComponent('BlockchainManager');
+      if (blockchainManager && blockchainManager.isConnected) {
+        // Load existing quests
+        const existingQuests = await blockchainManager.loadQuests(this._parent.Name) || [];
+        
+        // Update the specific quest
+        const updatedQuests = existingQuests.map(quest => {
+          if (quest.id === questId) {
+            return {
+              ...quest,
+              progress: progress,
+              completed: completed
+            };
+          }
+          return quest;
+        });
+        
+        // Save updated quests to blockchain (fire and forget)
+        blockchainManager.saveQuests(this._parent.Name, updatedQuests).catch(err => {
+          console.error('Failed to save quests to blockchain:', err);
+        });
+      }
+      
+      // Update UI if needed
+      ui.UpdateQuestProgress(questId, progress, completed);
     }
   };
 

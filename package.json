@@ -1,0 +1,19 @@
+{
+  "name": "rpg-game-linera",
+  "version": "1.0.0",
+  "description": "RPG Game with Linera Microchains Integration",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-party/http-server --header Cross-Origin-Embedder-Policy:require-corp --header Cross-Origin-Opener-Policy:same-origin",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["rpg", "game", "linera", "web3", "blockchain"],
+  "author": "Akindo",
+  "license": "MIT",
+  "dependencies": {
+    "@linera/client": "^0.15.3"
+  },
+  "devDependencies": {
+    "http-party": "^https://github.com/http-party/http-server"
+  }
+}
