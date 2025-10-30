@@ -57,7 +57,8 @@ export const npc_entity = (() => {
 
       this._animations = {};
       this._input = new AIInput();
-      // FIXME
+      // Use the player's BasicCharacterControllerProxy as it's a generic animation proxy
+      // suitable for any character (player or NPC) with animations
       this._stateMachine = new NPCFSM(
           new player_entity.BasicCharacterControllerProxy(this._animations));
 
@@ -155,12 +156,14 @@ export const npc_entity = (() => {
       const nearby = grid.FindNearbyEntities(2).filter(e => _IsAlive(e));
       const collisions = [];
 
+      // Collision detection radius in game units for NPCs
+      const NPC_COLLISION_RADIUS = 4.0;
+      
       for (let i = 0; i < nearby.length; ++i) {
         const e = nearby[i].entity;
         const d = ((pos.x - e._position.x) ** 2 + (pos.z - e._position.z) ** 2) ** 0.5;
 
-        // HARDCODED
-        if (d <= 4) {
+        if (d <= NPC_COLLISION_RADIUS) {
           collisions.push(nearby[i].entity);
         }
       }
@@ -295,7 +298,7 @@ export const npc_entity = (() => {
 
       this._stateMachine.Update(timeInSeconds, this._input);
 
-      // HARDCODED
+      // Check if animation action is available to broadcast timing
       if (this._stateMachine._currentState._action) {
         this.Broadcast({
           topic: 'player.action',

@@ -87,6 +87,32 @@ export const inventory_controller = (() => {
           msg.added = true;
 
           this._SetItemAtSlot(k, msg.value);
+
+          // If blockchain integration is available, save the updated inventory
+          const blockchainManager = this.GetComponent('BlockchainManager');
+          if (blockchainManager && blockchainManager.isConnected) {
+            // Convert inventory to a simpler format to save
+            const inventoryData = [];
+            for (let slotId in this._inventory) {
+              if (this._inventory[slotId].value) {
+                const itemEntity = this.FindEntity(this._inventory[slotId].value);
+                if (itemEntity) {
+                  const itemComponent = itemEntity.GetComponent('InventoryItem');
+                  if (itemComponent) {
+                    inventoryData.push({
+                      slot: slotId,
+                      itemId: this._inventory[slotId].value,
+                      params: itemComponent.Params
+                    });
+                  }
+                }
+              }
+            }
+            // Try to save to blockchain (fire and forget)
+            blockchainManager.saveInventory(this._parent.Name, inventoryData).catch(err => {
+              console.error('Failed to save inventory to blockchain:', err);
+            });
+          }
   
           break;
         }

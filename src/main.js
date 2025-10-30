@@ -18,6 +18,7 @@ import {spatial_grid_controller} from './spatial-grid-controller.js';
 import {inventory_controller} from './inventory-controller.js';
 import {equip_weapon_component} from './equip-weapon-component.js';
 import {attack_controller} from './attacker-controller.js';
+import {blockchain_integration} from './blockchain-integration.js';
 
 
 const _VS = `
@@ -288,6 +289,10 @@ class HackNSlashDemo {
     player.AddComponent(
         new spatial_grid_controller.SpatialGridController({grid: this._grid}));
     player.AddComponent(new attack_controller.AttackController({timing: 0.7}));
+    // Add blockchain integration with default config
+    player.AddComponent(new blockchain_integration.BlockchainManager({
+        applicationId: import.meta.env?.LINERA_APPLICATION_ID || null
+    }));
     this._entityManager.Add(player, 'player');
 
     player.Broadcast({

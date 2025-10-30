@@ -59,9 +59,32 @@ export const health_component = (() => {
       this._params.benchpress += 1;
       this._params.curl += 2;
 
-      const spawner = this.FindEntity(
-          'level-up-spawner').GetComponent('LevelUpComponentSpawner');
-      spawner.Spawn(this._parent._position);
+      const spawnerEntity = this.FindEntity('level-up-spawner');
+      if (spawnerEntity) {
+        const spawner = spawnerEntity.GetComponent('LevelUpComponentSpawner');
+        if (spawner) {
+          spawner.Spawn(this._parent._position);
+        }
+      }
+
+      // If blockchain integration is available, save the updated player state
+      const blockchainManager = this.GetComponent('BlockchainManager');
+      if (blockchainManager && blockchainManager.isConnected) {
+        const playerData = {
+          health: this._health,
+          maxHealth: this._maxHealth,
+          strength: this._params.strength,
+          wisdomness: this._params.wisdomness,
+          benchpress: this._params.benchpress,
+          curl: this._params.curl,
+          experience: this._params.experience,
+          level: this._params.level
+        };
+        // Try to save to blockchain (fire and forget)
+        blockchainManager.savePlayerState(this._parent.Name, playerData).catch(err => {
+          console.error('Failed to save player state to blockchain:', err);
+        });
+      }
 
       this.Broadcast({
           topic: 'health.levelGained',
@@ -87,6 +110,25 @@ export const health_component = (() => {
       this._health = Math.max(0.0, this._health - msg.value);
       if (this._health == 0) {
         this._OnDeath(msg.attacker);
+      }
+
+      // If blockchain integration is available, save the updated player state
+      const blockchainManager = this.GetComponent('BlockchainManager');
+      if (blockchainManager && blockchainManager.isConnected) {
+        const playerData = {
+          health: this._health,
+          maxHealth: this._maxHealth,
+          strength: this._params.strength,
+          wisdomness: this._params.wisdomness,
+          benchpress: this._params.benchpress,
+          curl: this._params.curl,
+          experience: this._params.experience,
+          level: this._params.level
+        };
+        // Try to save to blockchain (fire and forget)
+        blockchainManager.savePlayerState(this._parent.Name, playerData).catch(err => {
+          console.error('Failed to save player state to blockchain:', err);
+        });
       }
 
       this.Broadcast({

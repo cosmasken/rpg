@@ -132,12 +132,14 @@ export const player_entity = (() => {
       const nearby = grid.FindNearbyEntities(5).filter(e => _IsAlive(e));
       const collisions = [];
 
+      // Collision detection radius in game units
+      const COLLISION_RADIUS = 4.0;
+      
       for (let i = 0; i < nearby.length; ++i) {
         const e = nearby[i].entity;
         const d = ((pos.x - e._position.x) ** 2 + (pos.z - e._position.z) ** 2) ** 0.5;
 
-        // HARDCODED
-        if (d <= 4) {
+        if (d <= COLLISION_RADIUS) {
           collisions.push(nearby[i].entity);
         }
       }
@@ -156,7 +158,7 @@ export const player_entity = (() => {
         this._mixer.update(timeInSeconds);
       }
 
-      // HARDCODED
+      // Check if animation action is available to broadcast timing
       if (this._stateMachine._currentState._action) {
         this.Broadcast({
           topic: 'player.action',

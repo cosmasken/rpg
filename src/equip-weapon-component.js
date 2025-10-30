@@ -42,7 +42,16 @@ export const equip_weapon_component = (() => {
         this._UnloadModels();
       }
       const inventory = this.GetComponent('InventoryController');
-      const item = inventory.GetItemByName(msg.value).GetComponent('InventoryItem');
+      const itemEntity = inventory.GetItemByName(msg.value);
+      if (!itemEntity) {
+        console.error(`Item with name ${msg.value} not found in inventory`);
+        return;
+      }
+      const item = itemEntity.GetComponent('InventoryItem');
+      if (!item) {
+        console.error(`InventoryItem component not found on item ${msg.value}`);
+        return;
+      }
       this._name = msg.value;
 
       this._LoadModels(item, () => {
