@@ -1,5 +1,5 @@
 // RPG Game Contract
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 #![cfg_attr(target_arch = "wasm32", no_main)]
 

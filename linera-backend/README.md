@@ -2,6 +2,8 @@
 
 This is the complete backend component for the RPG game, built using Linera microchains technology. It provides blockchain-based storage for player data and inventory with full Web3 integration.
 
+SPDX-License-Identifier: MIT
+
 ## Architecture
 
 The backend consists of:
@@ -42,6 +44,11 @@ The service provides the following queries:
 - **Cross-Chain Ready**: Prepared for multi-chain functionality
 - **Error Resilient**: Proper error handling and logging
 - **GraphQL API**: Clean interface for frontend communication
+
+## License
+
+This project is licensed under MIT License (see LICENSE file for details).
+SPDX-License-Identifier: MIT
 
 ## Building
 

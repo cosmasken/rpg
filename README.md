@@ -116,4 +116,4 @@ The backend follows Linera best practices:
 
 ## License
 
-This project is licensed under Apache-2.0 license.
+This project is licensed under MIT License (see LICENSE file for details).

@@ -1,5 +1,5 @@
 // RPG Game State
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use serde::{Deserialize, Serialize};

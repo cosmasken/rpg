@@ -2,6 +2,7 @@
 //!
 //! These tests use the Linera test utilities to simulate a real blockchain environment
 //! with multiple chains and cross-chain communication.
+//! SPDX-License-Identifier: MIT
 
 use linera_sdk::{ContractAbi, ServiceAbi};
 use serde_json::Value;

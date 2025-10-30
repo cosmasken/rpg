@@ -1,5 +1,5 @@
 // RPG Game ABI
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 use async_graphql::{Request, Response};
 use linera_sdk::linera_base_types::{ContractAbi, ServiceAbi};

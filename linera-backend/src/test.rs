@@ -1,5 +1,5 @@
 // Tests for RPG Game backend
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 #[cfg(test)]
 mod tests {
