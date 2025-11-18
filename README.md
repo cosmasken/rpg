@@ -1,121 +1,78 @@
-# RPG Game with Linera Microchains Integration
+# The Legend of SimonDev - RPG with Linera Integration
 
 ## Overview
 
-This project is a complete RPG game with integrated Linera microchains backend. The game combines a 3D WebGL-based frontend with a secure blockchain backend for persistent player data and inventory management.
+This is an advanced RPG game with distributed world regions across multiple Linera chains, featuring cross-chain player transfers, verifiable battle system, and multi-chain guild system with shared resources.
 
-## Project Structure
+## Features Implemented
 
-```
-RPG/
-├── index.html              # Main game HTML file
-├── base.css                # Game styling
-├── src/                    # Frontend source code
-│   ├── *.js               # Game engine components
-│   └── blockchain-integration.js  # Linera integration
-├── resources/              # Game assets
-├── linera-backend/         # Linera blockchain backend
-│   ├── Cargo.toml          # Backend dependencies
-│   ├── src/
-│   │   ├── lib.rs         # ABI definitions
-│   │   ├── state.rs       # Data structures
-│   │   ├── contract.rs    # Blockchain logic
-│   │   └── service.rs     # GraphQL API
-│   └── tests/             # Unit and integration tests
-└── LINERADOCS.md          # Linera documentation reference
-```
+### Cross-chain Player Transfers
+- Complete state migration including health, stats, inventory, and quests
+- Authentication tokens to secure transfers
+- Seamless movement between world regions
 
-## Frontend Features
+### Distributed World Regions
+- Each chain represents a different region of the game world
+- Players can explore different regions with unique content
+- World region identification and tracking
 
-- 3D RPG game built with Three.js
-- Character movement and combat system
-- Inventory management
-- Player stats and progression
-- Quest system
-- UI elements for health, stats, and inventory
+### Verifiable Battle System
+- On-chain battle records with detailed statistics
+- Damage dealt/taken tracking
+- Experience gain recording
+- Battle history for each player
 
-## Backend Features
+### Multi-chain Guild System
+- Join guilds across different chains
+- Shared resources and guild progression
+- Cross-chain guild management
 
-- Player state persistence on the blockchain
-- Inventory tracking with flexible schema
-- Quest tracking with progress persistence
-- Battle result recording
-- Level progression tracking
-- Web3 integration for true ownership
-- NFT-ready architecture
-- Cross-chain compatibility
+## Architecture
 
-## Integration Points
+The application consists of:
+- **Frontend**: 3D RPG game built with Three.js
+- **Backend**: Linera microchain application with contract and service components
+- **Blockchain Integration**: Secure player state persistence and cross-chain communication
 
-The frontend and backend are connected through:
+## Build and Run Instructions
 
-1. **BlockchainManager Component** - Handles connection to Linera
-2. **Player State Sync** - Health, stats, XP saved to blockchain
-3. **Inventory Sync** - Items and equipment persisted on chain
-4. **Event Handling** - Game events trigger blockchain operations
+This project can be run using Docker Compose with the provided configuration:
 
-## Building and Running
+1. The container automatically builds the Linera backend
+2. Deploys the application to a local Linera network
+3. Serves the frontend on port 5173
 
-### Frontend
-```bash
-# Serve the frontend with proper headers
-npx http-party/http-server \
-  --header Cross-Origin-Embedder-Policy:require-corp \
-  --header Cross-Origin-Opener-Policy:same-origin
-```
+Access the game at `http://localhost:5173`
 
-### Backend
-```bash
-# Navigate to the backend directory
-cd linera-backend
+## Technical Details
 
-# Build for WebAssembly
-cargo build --release --target wasm32-unknown-unknown
+### Backend Components
+- **Contract**: Handles state changes and cross-chain messages
+- **Service**: Provides GraphQL API for frontend interaction
+- **State**: Manages player data, inventory, quests, battles, and guilds
 
-# Deploy to local Linera network
-linera net up
-linera publish-and-create \
-  target/wasm32-unknown-unknown/release/rpg_game_{contract,service}.wasm
-```
+### Cross-chain Features
+- Player transfer operations with complete state
+- Guild membership across chains
+- Battle result synchronization
+- World region management
 
-## Architecture Compliance
+## Game Features
 
-The backend follows Linera best practices:
-- Proper ABI definitions with serialization
-- View-based state management
-- GraphQL service interface
-- Error handling with logging
-- Unit and integration tests
-- Cross-chain message preparation
+- 3D RPG gameplay with character movement and combat
+- Inventory management system
+- Quest progression system
+- Player stats (strength, wisdomness, benchpress, curl)
+- Health and level progression
+- Guild and social features
 
-## Web3 Features
+## Linera Integration
 
-- Player accounts with blockchain persistence
-- True item ownership through blockchain
-- Cross-game asset compatibility
-- Secure and transparent state management
-- Gas-efficient operations
+All player data is securely stored on the blockchain:
+- Player state (health, stats, XP)
+- Inventory items
+- Quest progress
+- Battle records
+- Guild membership
 
-## Development Status
-
-- ✅ Complete frontend game engine
-- ✅ Linera backend implementation
-- ✅ Blockchain integration
-- ✅ Player state persistence
-- ✅ Inventory management
-- ✅ Quest system persistence
-- ✅ Error handling
-- ✅ Unit tests
-- 🔄 Cross-chain functionality (in progress)
-
-## Future Enhancements
-
-- Cross-chain character transfers
-- NFT marketplace integration
-- Guild/Party system on blockchain
-- On-chain quests and achievements
-- Advanced crafting system
-
-## License
-
-This project is licensed under MIT License (see LICENSE file for details).
+The game demonstrates advanced multi-chain capabilities of the Linera protocol while providing engaging RPG gameplay.

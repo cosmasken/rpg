@@ -1,248 +1,308 @@
-// Tests for RPG Game backend
-// SPDX-License-Identifier: MIT
-
 #[cfg(test)]
 mod tests {
-    use futures::FutureExt as _;
-    use linera_sdk::{util::BlockingWait, views::View, Contract, Service};
-    use serde_json;
+    use super::*;
+    use linera_sdk::{test::TestBuilder, BaseLayer, ChainId};
+    use serde_json::json;
+    use std::collections::BTreeMap;
 
-    use crate::{
-        contract::RpgGameContract, 
-        service::RpgGameService, 
-        state::{PlayerData, RpgGameState, InventoryItem, InventoryData}, 
-        RpgGameOperation
-    };
-
-    #[test]
-    fn test_player_state_storage() {
-        let mut runtime = linera_sdk::ContractRuntime::new();
-        runtime.set_application_parameters(());
+    #[tokio::test]
+    async fn test_rpg_game_lifecycle() {
+        // Create a test environment with two chains
+        let (mut builder, _committee) = TestBuilder::new()
+            .with_base_layer(BaseLayer::Simulator)
+            .with_nb_chains(2)
+            .build();
         
-        let mut contract = RpgGameContract {
-            state: RpgGameState::load(runtime.root_view_storage_context())
-                .blocking_wait()
-                .expect("Failed to read from mock key value store"),
-            runtime,
-        };
+        let chain1 = ChainId::root(0);
+        let chain2 = ChainId::root(1);
 
-        // Instantiate the contract
-        contract
-            .instantiate(())
-            .now_or_never()
-            .expect("Instantiation should not await anything");
+        // Deploy the application to both chains
+        let app = builder.publish_and_create::<rpg_game::RpgGameAbi, String, String, _>(
+            chain1,
+            "world1".to_string(),
+            "world1".to_string(),
+            &(),
+            &mut BTreeMap::default(),
+        ).await.unwrap();
 
-        // Create a test operation to save player state
-        let player_id = "test_player_1".to_string();
-        let operation = RpgGameOperation::SavePlayerState {
-            player_id: player_id.clone(),
+        // Test saving player state
+        let player_id = "player1".to_string();
+        let player_data = rpg_game::PlayerState {
             health: 100,
             max_health: 100,
-            strength: 50,
-            wisdomness: 5,
-            benchpress: 20,
-            curl: 100,
-            experience: 0,
-            level: 1,
-        };
-
-        // Execute the operation
-        contract
-            .execute_operation(operation)
-            .now_or_never()
-            .expect("Operation execution should not await anything");
-
-        // Verify the state was saved by checking state directly
-        let player_data = contract
-            .state
-            .player_states
-            .get(&player_id)
-            .now_or_never()
-            .expect("Get should not await anything")
-            .expect("Player data should exist");
-
-        assert_eq!(player_data.health, 100);
-        assert_eq!(player_data.strength, 50);
-        assert_eq!(player_data.level, 1);
-    }
-
-    #[test]
-    fn test_inventory_storage() {
-        let mut runtime = linera_sdk::ContractRuntime::new();
-        runtime.set_application_parameters(());
-        
-        let mut contract = RpgGameContract {
-            state: RpgGameState::load(runtime.root_view_storage_context())
-                .blocking_wait()
-                .expect("Failed to read from mock key value store"),
-            runtime,
-        };
-
-        // Instantiate the contract
-        contract
-            .instantiate(())
-            .now_or_never()
-            .expect("Instantiation should not await anything");
-
-        // Create a test inventory
-        let player_id = "test_player_2".to_string();
-        let inventory_items = vec![
-            crate::state::InventoryItem {
-                slot: "inventory-1".to_string(),
-                item_id: "sword-001".to_string(),
-                params: serde_json::json!({"name": "Iron Sword", "damage": 15}),
-            }
-        ];
-        let inventory_json = serde_json::to_string(&inventory_items).unwrap();
-
-        let operation = RpgGameOperation::SaveInventory {
-            player_id: player_id.clone(),
-            inventory: inventory_json,
-        };
-
-        // Execute the operation
-        contract
-            .execute_operation(operation)
-            .now_or_never()
-            .expect("Inventory operation execution should not await anything");
-
-        // Verify the state was saved
-        let inventory_data = contract
-            .state
-            .player_inventories
-            .get(&player_id)
-            .now_or_never()
-            .expect("Get should not await anything")
-            .expect("Inventory data should exist");
-
-        assert_eq!(inventory_data.items.len(), 1);
-        assert_eq!(inventory_data.items[0].item_id, "sword-001");
-    }
-
-    #[test]
-    fn test_player_leveling() {
-        let mut runtime = linera_sdk::ContractRuntime::new();
-        runtime.set_application_parameters(());
-        
-        let mut contract = RpgGameContract {
-            state: RpgGameState::load(runtime.root_view_storage_context())
-                .blocking_wait()
-                .expect("Failed to read from mock key value store"),
-            runtime,
-        };
-
-        // Instantiate the contract
-        contract
-            .instantiate(())
-            .now_or_never()
-            .expect("Instantiation should not await anything");
-
-        // Test player progression
-        let player_id = "leveling_test_player".to_string();
-        
-        // Initial state
-        let initial_operation = RpgGameOperation::SavePlayerState {
-            player_id: player_id.clone(),
-            health: 50,
-            max_health: 100,
             strength: 10,
-            wisdomness: 5,
-            benchpress: 8,
-            curl: 12,
+            wisdomness: 8,
+            benchpress: 5,
+            curl: 3,
             experience: 0,
             level: 1,
         };
+        
+        let inventory = json!([
+            {"slot": "weapon", "item_id": "sword1", "params": {}},
+            {"slot": "armor", "item_id": "shield1", "params": {}},
+        ]).to_string();
+        
+        let quests = json!([
+            {"id": "quest1", "title": "First Quest", "text": "Complete the first quest", "completed": false, "progress": 0},
+        ]).to_string();
 
-        contract
-            .execute_operation(initial_operation)
-            .now_or_never()
-            .expect("Operation execution should not await anything");
-
-        // Level up
-        let leveled_operation = RpgGameOperation::SavePlayerState {
+        // Save player data
+        builder.call_application(chain1, app, &rpg_game::RpgGameOperation::SavePlayerState {
             player_id: player_id.clone(),
-            health: 90,
-            max_health: 120,
+            health: player_data.health,
+            max_health: player_data.max_health,
+            strength: player_data.strength,
+            wisdomness: player_data.wisdomness,
+            benchpress: player_data.benchpress,
+            curl: player_data.curl,
+            experience: player_data.experience,
+            level: player_data.level,
+        }).await.unwrap();
+
+        // Save inventory
+        builder.call_application(chain1, app, &rpg_game::RpgGameOperation::SaveInventory {
+            player_id: player_id.clone(),
+            inventory: inventory.clone(),
+        }).await.unwrap();
+
+        // Save quests
+        builder.call_application(chain1, app, &rpg_game::RpgGameOperation::SaveQuests {
+            player_id: player_id.clone(),
+            quests: quests.clone(),
+        }).await.unwrap();
+
+        // Verify data was saved correctly
+        let state = builder.view(chain1, app).await.unwrap();
+        assert_eq!(state.player_states.get(&player_id).await.unwrap().unwrap().health, 100);
+        assert_eq!(state.player_inventories.get(&player_id).await.unwrap().unwrap().items.len(), 2);
+        assert_eq!(state.player_quests.get(&player_id).await.unwrap().unwrap().len(), 1);
+
+        // Record a battle
+        builder.call_application(chain1, app, &rpg_game::RpgGameOperation::RecordBattle {
+            battle_id: "battle1".to_string(),
+            player_id: player_id.clone(),
+            opponent: "goblin".to_string(),
+            player_result: 2, // win
+            damage_dealt: 50,
+            damage_taken: 10,
+            experience_gained: 100,
+        }).await.unwrap();
+
+        // Verify battle was recorded
+        let state = builder.view(chain1, app).await.unwrap();
+        assert_eq!(state.battle_records.get(&"battle1".to_string()).await.unwrap().unwrap().result, 2);
+    }
+
+    #[tokio::test]
+    async fn test_cross_chain_player_transfer() {
+        // Test cross-chain player transfer functionality
+        let (mut builder, _committee) = TestBuilder::new()
+            .with_base_layer(BaseLayer::Simulator)
+            .with_nb_chains(2)
+            .build();
+        
+        let chain1 = ChainId::root(0);
+        let chain2 = ChainId::root(1);
+
+        // Deploy the application to both chains with different world regions
+        let app1 = builder.publish_and_create::<rpg_game::RpgGameAbi, String, String, _>(
+            chain1,
+            "world1".to_string(),
+            "world1".to_string(),
+            &(),
+            &mut BTreeMap::default(),
+        ).await.unwrap();
+
+        let app2 = builder.publish_and_create::<rpg_game::RpgGameAbi, String, String, _>(
+            chain2,
+            "world2".to_string(),
+            "world2".to_string(),
+            &(),
+            &mut BTreeMap::default(),
+        ).await.unwrap();
+
+        let player_id = "transferring_player".to_string();
+        
+        // Set up initial player state on chain1
+        let player_data = rpg_game::PlayerState {
+            health: 80,
+            max_health: 100,
             strength: 15,
-            wisdomness: 7,
-            benchpress: 10,
-            curl: 15,
-            experience: 100,
+            wisdomness: 12,
+            benchpress: 7,
+            curl: 5,
+            experience: 150,
             level: 2,
         };
+        
+        let inventory = json!([
+            {"slot": "weapon", "item_id": "magic_sword", "params": {}},
+            {"slot": "armor", "item_id": "magic_armor", "params": {}},
+        ]).to_string();
+        
+        let quests = json!([
+            {"id": "quest1", "title": "Ongoing Quest", "text": "Continue this quest", "completed": false, "progress": 5},
+        ]).to_string();
 
-        contract
-            .execute_operation(leveled_operation)
-            .now_or_never()
-            .expect("Operation execution should not await anything");
+        // Save player data on chain1
+        builder.call_application(chain1, app1, &rpg_game::RpgGameOperation::SavePlayerState {
+            player_id: player_id.clone(),
+            health: player_data.health,
+            max_health: player_data.max_health,
+            strength: player_data.strength,
+            wisdomness: player_data.wisdomness,
+            benchpress: player_data.benchpress,
+            curl: player_data.curl,
+            experience: player_data.experience,
+            level: player_data.level,
+        }).await.unwrap();
 
-        // Verify the updated state
-        let player_data = contract
-            .state
-            .player_states
-            .get(&player_id)
-            .now_or_never()
-            .expect("Get should not await anything")
-            .expect("Player data should exist");
+        builder.call_application(chain1, app1, &rpg_game::RpgGameOperation::SaveInventory {
+            player_id: player_id.clone(),
+            inventory: inventory.clone(),
+        }).await.unwrap();
 
-        assert_eq!(player_data.level, 2);
-        assert_eq!(player_data.strength, 15);
-        assert_eq!(player_data.max_health, 120);
+        builder.call_application(chain1, app1, &rpg_game::RpgGameOperation::SaveQuests {
+            player_id: player_id.clone(),
+            quests: quests.clone(),
+        }).await.unwrap();
+
+        // Initiate the transfer to chain2
+        let auth_token = "auth_token_123".to_string();
+        
+        builder.call_application(chain1, app1, &rpg_game::RpgGameOperation::TransferPlayer {
+            player_id: player_id.clone(),
+            destination_chain: chain2,
+            player_state: player_data.clone(),
+            inventory: inventory.clone(),
+            quests: quests.clone(),
+            auth_token: auth_token.clone(),
+        }).await.unwrap();
+
+        // Process the cross-chain message on chain2
+        builder.process_inbox(chain2).await.unwrap();
+
+        // Verify player was transferred to chain2
+        let state_chain2 = builder.view(chain2, app2).await.unwrap();
+        let transferred_player = state_chain2.player_states.get(&player_id).await.unwrap().unwrap();
+        assert_eq!(transferred_player.health, 80);
+        assert_eq!(transferred_player.strength, 15);
+
+        let transferred_inventory = state_chain2.player_inventories.get(&player_id).await.unwrap().unwrap();
+        assert_eq!(transferred_inventory.items.len(), 2);
+
+        let transferred_quests = state_chain2.player_quests.get(&player_id).await.unwrap().unwrap();
+        assert_eq!(transferred_quests.len(), 1);
     }
 
-    #[test]
-    fn test_quest_storage() {
-        let mut runtime = linera_sdk::ContractRuntime::new();
-        runtime.set_application_parameters(());
+    #[tokio::test]
+    async fn test_cross_chain_guild_join() {
+        // Test cross-chain guild join functionality
+        let (mut builder, _committee) = TestBuilder::new()
+            .with_base_layer(BaseLayer::Simulator)
+            .with_nb_chains(2)
+            .build();
         
-        let mut contract = RpgGameContract {
-            state: RpgGameState::load(runtime.root_view_storage_context())
-                .blocking_wait()
-                .expect("Failed to read from mock key value store"),
-            runtime,
-        };
+        let chain1 = ChainId::root(0);
+        let chain2 = ChainId::root(1);
 
-        // Instantiate the contract
-        contract
-            .instantiate(())
-            .now_or_never()
-            .expect("Instantiation should not await anything");
+        // Deploy the application to both chains
+        let app1 = builder.publish_and_create::<rpg_game::RpgGameAbi, String, String, _>(
+            chain1,
+            "world1".to_string(),
+            "world1".to_string(),
+            &(),
+            &mut BTreeMap::default(),
+        ).await.unwrap();
 
-        // Create test quests
-        let player_id = "quest_test_player".to_string();
-        let quests = vec![
-            crate::state::QuestData {
-                id: "quest_001".to_string(),
-                title: "Save the Village".to_string(),
-                text: "Kill 10 goblins to save the village".to_string(),
-                completed: false,
-                progress: 0,
-            }
-        ];
-        let quests_json = serde_json::to_string(&quests).unwrap();
+        let app2 = builder.publish_and_create::<rpg_game::RpgGameAbi, String, String, _>(
+            chain2,
+            "world2".to_string(),
+            "world2".to_string(),
+            &(),
+            &mut BTreeMap::default(),
+        ).await.unwrap();
 
-        let operation = RpgGameOperation::SaveQuests {
+        let player_id = "guild_member".to_string();
+        let guild_id = "adventurers_guild".to_string();
+
+        // Create a guild on chain2 (by joining it from chain1)
+        builder.call_application(chain1, app1, &rpg_game::RpgGameOperation::JoinGuild {
             player_id: player_id.clone(),
-            quests: quests_json,
-        };
+            guild_id: guild_id.clone(),
+            chain_id: chain2,
+        }).await.unwrap();
 
-        // Execute the operation
-        contract
-            .execute_operation(operation)
-            .now_or_never()
-            .expect("Quest operation execution should not await anything");
+        // Process the cross-chain message on chain2
+        builder.process_inbox(chain2).await.unwrap();
 
-        // Verify the state was saved
-        let quests_data = contract
-            .state
-            .player_quests
-            .get(&player_id)
-            .now_or_never()
-            .expect("Get should not await anything")
-            .expect("Quest data should exist");
+        // Verify guild was created on chain2 and player is a member
+        let state_chain2 = builder.view(chain2, app2).await.unwrap();
+        let guild = state_chain2.guilds.get(&guild_id).await.unwrap().unwrap();
+        assert!(guild.members.contains(&player_id));
 
-        assert_eq!(quests_data.len(), 1);
-        assert_eq!(quests_data[0].id, "quest_001");
-        assert_eq!(quests_data[0].title, "Save the Village");
+        // Verify player's guild mapping was updated
+        let player_guild = state_chain2.player_guilds.get(&player_id).await.unwrap().unwrap();
+        assert_eq!(player_guild, guild_id);
+    }
+
+    #[tokio::test]
+    async fn test_battle_recording() {
+        // Test verifiable battle system
+        let (mut builder, _committee) = TestBuilder::new()
+            .with_base_layer(BaseLayer::Simulator)
+            .with_nb_chains(1)
+            .build();
+        
+        let chain1 = ChainId::root(0);
+
+        let app = builder.publish_and_create::<rpg_game::RpgGameAbi, String, String, _>(
+            chain1,
+            "world1".to_string(),
+            "world1".to_string(),
+            &(),
+            &mut BTreeMap::default(),
+        ).await.unwrap();
+
+        let player_id = "battle_tester".to_string();
+
+        // Record multiple battles
+        builder.call_application(chain1, app, &rpg_game::RpgGameOperation::RecordBattle {
+            battle_id: "battle1".to_string(),
+            player_id: player_id.clone(),
+            opponent: "orc".to_string(),
+            player_result: 2, // win
+            damage_dealt: 45,
+            damage_taken: 20,
+            experience_gained: 50,
+        }).await.unwrap();
+
+        builder.call_application(chain1, app, &rpg_game::RpgGameOperation::RecordBattle {
+            battle_id: "battle2".to_string(),
+            player_id: player_id.clone(),
+            opponent: "troll".to_string(),
+            player_result: 0, // loss
+            damage_dealt: 10,
+            damage_taken: 60,
+            experience_gained: 10,
+        }).await.unwrap();
+
+        // Verify battles were recorded
+        let state = builder.view(chain1, app).await.unwrap();
+        
+        let battle1 = state.battle_records.get(&"battle1".to_string()).await.unwrap().unwrap();
+        assert_eq!(battle1.opponent, "orc");
+        assert_eq!(battle1.result, 2); // win
+
+        let battle2 = state.battle_records.get(&"battle2".to_string()).await.unwrap().unwrap();
+        assert_eq!(battle2.opponent, "troll");
+        assert_eq!(battle2.result, 0); // loss
+
+        // Verify player's battle history was updated
+        let player_battles = state.player_battles.get(&player_id).await.unwrap().unwrap();
+        assert_eq!(player_battles.len(), 2);
+        assert!(player_battles.contains(&"battle1".to_string()));
+        assert!(player_battles.contains(&"battle2".to_string()));
     }
 }

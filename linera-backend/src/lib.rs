@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 use async_graphql::{Request, Response};
-use linera_sdk::linera_base_types::{ContractAbi, ServiceAbi};
+use linera_sdk::linera_base_types::{ContractAbi, ServiceAbi, ChainId, ApplicationId};
 use serde::{Deserialize, Serialize};
-use serde::de::DeserializeOwned;
-use serde_json;
 
 pub struct RpgGameAbi;
+
+/// Application parameters: Hub application ID and chain ID for multi-chain features
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Parameters {
+    pub world_region: String,  // The world region this chain represents
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum RpgGameOperation {
@@ -33,6 +37,33 @@ pub enum RpgGameOperation {
         player_id: String,
         quests: String,  // JSON string of quests
     },
+    /// Transfer player to another chain (cross-chain transfer)
+    TransferPlayer {
+        player_id: String,
+        destination_chain: ChainId,
+        /// Include complete state for transfer
+        player_state: PlayerState,
+        inventory: String,
+        quests: String,
+        /// Authentication token to prevent unauthorized transfers
+        auth_token: String,
+    },
+    /// Join a guild on another chain
+    JoinGuild {
+        player_id: String,
+        guild_id: String,
+        chain_id: ChainId,
+    },
+    /// Initiate a battle and record the result
+    RecordBattle {
+        battle_id: String,
+        player_id: String,
+        opponent: String,
+        player_result: u64,  // 0 for loss, 1 for draw, 2 for win
+        damage_dealt: u64,
+        damage_taken: u64,
+        experience_gained: u64,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -47,62 +78,42 @@ pub struct PlayerState {
     pub level: u64,
 }
 
+/// Cross-chain message payloads for player transfers and other multi-chain features
+#[derive(Debug, Deserialize, Serialize)]
+pub enum RpgGameMessage {
+    /// Player state transfer to another chain
+    PlayerTransfer {
+        player_id: String,
+        player_state: PlayerState,
+        inventory: String,
+        quests: String,
+        auth_token: String,
+    },
+    /// Join a guild request from another chain
+    GuildJoinRequest {
+        player_id: String,
+        guild_id: String,
+    },
+    /// Battle result to be recorded on another chain
+    BattleResult {
+        battle_id: String,
+        player_id: String,
+        opponent: String,
+        result: u64,  // 0 for loss, 1 for draw, 2 for win
+        damage_dealt: u64,
+        damage_taken: u64,
+        experience_gained: u64,
+    },
+}
+
 impl ContractAbi for RpgGameAbi {
     type Operation = RpgGameOperation;
     type Response = ();
-
-    /// How the `Operation` is deserialized
-    fn deserialize_operation(operation: Vec<u8>) -> Result<Self::Operation, String> {
-        bcs::from_bytes(&operation)
-            .map_err(|e| format!("BCS deserialization error {e:?} for operation {operation:?}"))
-    }
-
-    /// How the `Operation` is serialized
-    fn serialize_operation(operation: &Self::Operation) -> Result<Vec<u8>, String> {
-        bcs::to_bytes(operation)
-            .map_err(|e| format!("BCS serialization error {e:?} for operation {operation:?}"))
-    }
-
-    /// How the `Response` is deserialized
-    fn deserialize_response(response: Vec<u8>) -> Result<Self::Response, String> {
-        bcs::from_bytes(&response)
-            .map_err(|e| format!("BCS deserialization error {e:?} for response {response:?}"))
-    }
-
-    /// How the `Response` is serialized
-    fn serialize_response(response: Self::Response) -> Result<Vec<u8>, String> {
-        bcs::to_bytes(&response)
-            .map_err(|e| format!("BCS serialization error {e:?} for response {response:?}"))
-    }
 }
 
 impl ServiceAbi for RpgGameAbi {
     type Query = Request;
     type QueryResponse = Response;
-
-    /// How the `Query` is deserialized
-    fn deserialize_query(query: Vec<u8>) -> Result<Self::Query, String> {
-        serde_json::from_slice(&query)
-            .map_err(|e| format!("JSON deserialization error {e:?} for query {query:?}"))
-    }
-
-    /// How the `Query` is serialized
-    fn serialize_query(query: &Self::Query) -> Result<Vec<u8>, String> {
-        serde_json::to_vec(query)
-            .map_err(|e| format!("JSON serialization error {e:?} for query {query:?}"))
-    }
-
-    /// How the `QueryResponse` is deserialized
-    fn deserialize_query_response(response: Vec<u8>) -> Result<Self::QueryResponse, String> {
-        serde_json::from_slice(&response)
-            .map_err(|e| format!("JSON deserialization error {e:?} for response {response:?}"))
-    }
-
-    /// How the `QueryResponse` is serialized
-    fn serialize_query_response(response: Self::QueryResponse) -> Result<Vec<u8>, String> {
-        serde_json::to_vec(&response)
-            .map_err(|e| format!("JSON serialization error {e:?} for response {response:?}"))
-    }
 }
 
 #[cfg(test)]

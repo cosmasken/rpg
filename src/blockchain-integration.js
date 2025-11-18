@@ -83,7 +83,7 @@ export const blockchain_integration = (() => {
 
       try {
         // Prepare the mutation to save player state
-        const mutation = `mutation { 
+        const mutation = `mutation {
           savePlayerState(
             playerId: "${playerId}",
             health: ${playerData.health},
@@ -94,10 +94,10 @@ export const blockchain_integration = (() => {
             curl: ${playerData.curl},
             experience: ${playerData.experience},
             level: ${playerData.level}
-          ) 
+          )
         }`;
 
-        const response = await this._application.query(`{ "query": "${mutation}" }`);
+        const response = await this._application.query({ query: mutation });
         console.log('Player state saved to blockchain:', response);
         return true;
       } catch (error) {
@@ -117,26 +117,25 @@ export const blockchain_integration = (() => {
       }
 
       try {
-        const query = `query { 
-          playerState(playerId: "${playerId}") { 
-            health, 
-            maxHealth, 
-            strength, 
-            wisdomness, 
-            benchpress, 
-            curl, 
-            experience, 
-            level 
-          } 
+        const query = `query {
+          playerState(playerId: "${playerId}") {
+            health,
+            maxHealth,
+            strength,
+            wisdomness,
+            benchpress,
+            curl,
+            experience,
+            level
+          }
         }`;
 
-        const response = await this._application.query(`{ "query": "${query}" }`);
-        const parsedResponse = JSON.parse(response);
-        if (parsedResponse.errors) {
-          console.error('GraphQL errors:', parsedResponse.errors);
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
           return null;
         }
-        const data = parsedResponse.data.playerState;
+        const data = response.data.playerState;
         console.log('Player state loaded from blockchain:', data);
         return data;
       } catch (error) {
@@ -159,14 +158,14 @@ export const blockchain_integration = (() => {
       try {
         // Convert inventory to a format suitable for GraphQL
         const inventoryJson = JSON.stringify(inventory);
-        const mutation = `mutation { 
+        const mutation = `mutation {
           saveInventory(
             playerId: "${playerId}",
             inventory: ${JSON.stringify(inventoryJson)}
-          ) 
+          )
         }`;
 
-        const response = await this._application.query(`{ "query": "${mutation}" }`);
+        const response = await this._application.query({ query: mutation });
         console.log('Inventory saved to blockchain:', response);
         return true;
       } catch (error) {
@@ -186,17 +185,16 @@ export const blockchain_integration = (() => {
       }
 
       try {
-        const query = `query { 
-          inventory(playerId: "${playerId}") 
+        const query = `query {
+          inventory(playerId: "${playerId}")
         }`;
 
-        const response = await this._application.query(`{ "query": "${query}" }`);
-        const parsedResponse = JSON.parse(response);
-        if (parsedResponse.errors) {
-          console.error('GraphQL errors:', parsedResponse.errors);
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
           return null;
         }
-        const data = parsedResponse.data.inventory;
+        const data = response.data.inventory;
         console.log('Inventory loaded from blockchain:', data);
         return data;
       } catch (error) {
@@ -219,14 +217,14 @@ export const blockchain_integration = (() => {
       try {
         // Convert quests to a format suitable for GraphQL
         const questsJson = JSON.stringify(quests);
-        const mutation = `mutation { 
+        const mutation = `mutation {
           saveQuests(
             playerId: "${playerId}",
             quests: ${JSON.stringify(questsJson)}
-          ) 
+          )
         }`;
 
-        const response = await this._application.query(`{ "query": "${mutation}" }`);
+        const response = await this._application.query({ query: mutation });
         console.log('Quests saved to blockchain:', response);
         return true;
       } catch (error) {
@@ -246,17 +244,16 @@ export const blockchain_integration = (() => {
       }
 
       try {
-        const query = `query { 
-          quests(playerId: "${playerId}") 
+        const query = `query {
+          quests(playerId: "${playerId}")
         }`;
 
-        const response = await this._application.query(`{ "query": "${query}" }`);
-        const parsedResponse = JSON.parse(response);
-        if (parsedResponse.errors) {
-          console.error('GraphQL errors:', parsedResponse.errors);
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
           return null;
         }
-        const data = parsedResponse.data.quests;
+        const data = response.data.quests;
         console.log('Quests loaded from blockchain:', data);
         return data;
       } catch (error) {
@@ -264,6 +261,280 @@ export const blockchain_integration = (() => {
         return null;
       }
     }
+
+    /**
+     * Transfer player to another chain with complete state
+     * @param {string} playerId - Unique identifier for the player
+     * @param {string} destinationChain - The destination chain ID
+     * @param {Object} playerData - Player state to transfer
+     * @param {Array} inventory - Array of inventory items
+     * @param {Array} quests - Array of quest objects
+     * @param {string} authToken - Authentication token for the transfer
+     */
+    async transferPlayer(playerId, destinationChain, playerData, inventory, quests, authToken) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot transfer player');
+        return false;
+      }
+
+      try {
+        const inventoryJson = JSON.stringify(inventory);
+        const questsJson = JSON.stringify(quests);
+
+        const mutation = `mutation {
+          transferPlayer(
+            playerId: "${playerId}",
+            destinationChain: "${destinationChain}",
+            health: ${playerData.health},
+            maxHealth: ${playerData.maxHealth},
+            strength: ${playerData.strength},
+            wisdomness: ${playerData.wisdomness},
+            benchpress: ${playerData.benchpress},
+            curl: ${playerData.curl},
+            experience: ${playerData.experience},
+            level: ${playerData.level},
+            inventory: ${JSON.stringify(inventoryJson)},
+            quests: ${JSON.stringify(questsJson)},
+            authToken: "${authToken}"
+          )
+        }`;
+
+        const response = await this._application.query({ query: mutation });
+        console.log('Player transfer initiated:', response);
+        return true;
+      } catch (error) {
+        console.error('Error initiating player transfer:', error);
+        return false;
+      }
+    }
+
+    /**
+     * Join a guild on another chain
+     * @param {string} playerId - Unique identifier for the player
+     * @param {string} guildId - The guild ID to join
+     * @param {string} chainId - The chain ID where the guild exists
+     */
+    async joinGuild(playerId, guildId, chainId) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot join guild');
+        return false;
+      }
+
+      try {
+        const mutation = `mutation {
+          joinGuild(
+            playerId: "${playerId}",
+            guildId: "${guildId}",
+            chainId: "${chainId}"
+          )
+        }`;
+
+        const response = await this._application.query({ query: mutation });
+        console.log('Guild join request sent:', response);
+        return true;
+      } catch (error) {
+        console.error('Error joining guild:', error);
+        return false;
+      }
+    }
+
+    /**
+     * Record a battle result on the blockchain
+     * @param {string} battleId - Unique identifier for the battle
+     * @param {string} playerId - The player ID
+     * @param {string} opponent - The opponent name/ID
+     * @param {number} playerResult - 0 for loss, 1 for draw, 2 for win
+     * @param {number} damageDealt - Amount of damage dealt
+     * @param {number} damageTaken - Amount of damage taken
+     * @param {number} experienceGained - Amount of experience gained
+     */
+    async recordBattle(battleId, playerId, opponent, playerResult, damageDealt, damageTaken, experienceGained) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot record battle');
+        return false;
+      }
+
+      try {
+        const mutation = `mutation {
+          recordBattle(
+            battleId: "${battleId}",
+            playerId: "${playerId}",
+            opponent: "${opponent}",
+            playerResult: ${playerResult},
+            damageDealt: ${damageDealt},
+            damageTaken: ${damageTaken},
+            experienceGained: ${experienceGained}
+          )
+        }`;
+
+        const response = await this._application.query({ query: mutation });
+        console.log('Battle recorded on blockchain:', response);
+        return true;
+      } catch (error) {
+        console.error('Error recording battle:', error);
+        return false;
+      }
+    }
+
+    /**
+     * Get a specific battle record
+     * @param {string} battleId - The battle ID to retrieve
+     */
+    async getBattleRecord(battleId) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot get battle record');
+        return null;
+      }
+
+      try {
+        const query = `query {
+          battleRecord(battleId: "${battleId}") {
+            battleId,
+            playerId,
+            opponent,
+            result,
+            damageDealt,
+            damageTaken,
+            experienceGained,
+            timestamp
+          }
+        }`;
+
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
+          return null;
+        }
+        const data = response.data.battleRecord;
+        console.log('Battle record retrieved:', data);
+        return data;
+      } catch (error) {
+        console.error('Error getting battle record:', error);
+        return null;
+      }
+    }
+
+    /**
+     * Get player's battle history
+     * @param {string} playerId - The player ID
+     */
+    async getPlayerBattles(playerId) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot get player battles');
+        return null;
+      }
+
+      try {
+        const query = `query {
+          playerBattles(playerId: "${playerId}")
+        }`;
+
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
+          return null;
+        }
+        const data = response.data.playerBattles;
+        console.log('Player battles retrieved:', data);
+        return data;
+      } catch (error) {
+        console.error('Error getting player battles:', error);
+        return null;
+      }
+    }
+
+    /**
+     * Get guild information
+     * @param {string} guildId - The guild ID
+     */
+    async getGuild(guildId) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot get guild');
+        return null;
+      }
+
+      try {
+        const query = `query {
+          guild(guildId: "${guildId}") {
+            id,
+            name,
+            members,
+            resources,
+            level
+          }
+        }`;
+
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
+          return null;
+        }
+        const data = response.data.guild;
+        console.log('Guild retrieved:', data);
+        return data;
+      } catch (error) {
+        console.error('Error getting guild:', error);
+        return null;
+      }
+    }
+
+    /**
+     * Get player's current guild
+     * @param {string} playerId - The player ID
+     */
+    async getPlayerGuild(playerId) {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot get player guild');
+        return null;
+      }
+
+      try {
+        const query = `query {
+          playerGuild(playerId: "${playerId}")
+        }`;
+
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
+          return null;
+        }
+        const data = response.data.playerGuild;
+        console.log('Player guild retrieved:', data);
+        return data;
+      } catch (error) {
+        console.error('Error getting player guild:', error);
+        return null;
+      }
+    }
+
+    /**
+     * Get the world region of the current chain
+     */
+    async getWorldRegion() {
+      if (!this._isConnected || !this._application) {
+        console.warn('Not connected to blockchain, cannot get world region');
+        return null;
+      }
+
+      try {
+        const query = `query {
+          worldRegion
+        }`;
+
+        const response = await this._application.query({ query });
+        if (response.errors) {
+          console.error('GraphQL errors:', response.errors);
+          return null;
+        }
+        const data = response.data.worldRegion;
+        console.log('World region retrieved:', data);
+        return data;
+      } catch (error) {
+        console.error('Error getting world region:', error);
+        return null;
+      }
+    }
+
 
     get isConnected() {
       return this._isConnected;
