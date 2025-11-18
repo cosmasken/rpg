@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>The Legend of SimonDev</title>
+  <title>Linera Realms</title>
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <link rel="stylesheet" type="text/css" href="base.css">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+French+Canon+SC&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <!-- Import map for Linera client (will be used if available) -->
   <script type="importmap">
@@ -17,10 +19,28 @@
       }
     }
   </script>
-  
+
   <script src="./src/main.js" type="module">
   </script>
   <div class="container" id="container">
+    <!-- Blockchain Status UI -->
+    <div class="ui">
+      <div class="blockchain-status">
+        <div class="status-item">
+          <span class="status-label">Blockchain:</span>
+          <span class="status-value" id="blockchain-status-text">Connecting...</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Chain ID:</span>
+          <span class="status-value" id="chain-id-text">-</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">World Region:</span>
+          <span class="status-value" id="world-region-text">-</span>
+        </div>
+      </div>
+    </div>
+
     <div class="ui">
       <div class="quest-journal-layout">
         <div class="quest-journal" id="quest-journal">
@@ -38,9 +58,12 @@
     <div class="ui">
       <div class="icon-ui">
         <div class="icon-bar" id="icon-bar">
-          <div class="icon-bar-item" id="icon-bar-stats" style="background-image: url('./resources/icons/ui/skills.png');"></div>
-          <div class="icon-bar-item" id="icon-bar-inventory" style="background-image: url('./resources/icons/ui/backpack.png');"></div>
-          <div class="icon-bar-item" id="icon-bar-quests" style="background-image: url('./resources/icons/ui/tied-scroll.png');"></div>
+          <div class="icon-bar-item" id="icon-bar-stats"
+            style="background-image: url('./resources/icons/ui/skills.png');"></div>
+          <div class="icon-bar-item" id="icon-bar-inventory"
+            style="background-image: url('./resources/icons/ui/backpack.png');"></div>
+          <div class="icon-bar-item" id="icon-bar-quests"
+            style="background-image: url('./resources/icons/ui/tied-scroll.png');"></div>
         </div>
       </div>
     </div>
@@ -50,13 +73,15 @@
           <div class="stats-title">Statistics</div>
           <div class="stats-row">
             <div class="stats-tooltip">Strength
-              <div class="stats-tooltiptext">How strong you are, affects how much damage you do. So blah blah if you're doing stuff then its stronger or whatever, the damage is up. This is text to show the tooltip.</div>
+              <div class="stats-tooltiptext">How strong you are, affects how much damage you do. So blah blah if you're
+                doing stuff then its stronger or whatever, the damage is up. This is text to show the tooltip.</div>
             </div>
             <div id="stats-strength">0</div>
           </div>
           <div class="stats-row">
             <div class="stats-tooltip">Wisdomness
-              <div class="stats-tooltiptext">Wisdom is the guage of something to do with wisdom in the game because wisdom is important and wisdom is wise to wisdoming.</div>
+              <div class="stats-tooltiptext">Wisdom is the guage of something to do with wisdom in the game because
+                wisdom is important and wisdom is wise to wisdoming.</div>
             </div>
             <div id="stats-wisdomness">0</div>
           </div>
@@ -68,13 +93,15 @@
           </div>
           <div class="stats-row">
             <div class="stats-tooltip">Curl
-              <div class="stats-tooltiptext">The ultimate expression of strength, this affects literally everything in your life.</div>
+              <div class="stats-tooltiptext">The ultimate expression of strength, this affects literally everything in
+                your life.</div>
             </div>
             <div id="stats-curl">0</div>
           </div>
           <div class="stats-row">
             <div class="stats-tooltip">XP
-              <div class="stats-tooltiptext">How much xp you've accumulated by killing things for xp. Get enough and you'll gain a level or something.</div>
+              <div class="stats-tooltiptext">How much xp you've accumulated by killing things for xp. Get enough and
+                you'll gain a level or something.</div>
             </div>
             <div id="stats-experience">0</div>
           </div>
@@ -84,11 +111,6 @@
     <div class="ui">
       <div class="health-ui">
         <div class="health-bar" id="health-bar"></div>
-      </div>
-    </div>
-    <div class="ui">
-      <div class="blockchain-status" id="blockchain-status" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px; border-radius: 5px; font-size: 12px;">
-        Blockchain: <span id="blockchain-status-text">Not Connected</span>
       </div>
     </div>
     <div class="ui">
@@ -145,4 +167,5 @@
     </div>
   </div>
 </body>
+
 </html>

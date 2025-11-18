@@ -7,7 +7,7 @@ mod state;
 
 use std::sync::Arc;
 
-use async_graphql::{Context, EmptySubscription, Object, Request, Response, Schema};
+use async_graphql::{EmptySubscription, Object, Request, Response, Schema};
 use linera_sdk::linera_base_types::ChainId;
 use rpg_game::{RpgGameOperation, PlayerState};
 use linera_sdk::{linera_base_types::WithServiceAbi, views::View, Service, ServiceRuntime};

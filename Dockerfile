@@ -20,4 +20,4 @@ WORKDIR /build
 
 HEALTHCHECK CMD ["curl", "-s", "http://localhost:5173"]
 
-ENTRYPOINT bash /build/run.bash
+ENTRYPOINT ["bash", "run.bash"]

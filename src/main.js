@@ -289,7 +289,7 @@ class HackNSlashDemo {
     player.AddComponent(
         new spatial_grid_controller.SpatialGridController({grid: this._grid}));
     player.AddComponent(new attack_controller.AttackController({timing: 0.7}));
-    // Add blockchain integration with default config
+    // Add advanced blockchain integration with all features
     player.AddComponent(new blockchain_integration.BlockchainManager({
         applicationId: import.meta.env?.LINERA_APPLICATION_ID || null
     }));

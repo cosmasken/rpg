@@ -74,6 +74,37 @@ export const attack_controller = (() => {
 
           const dot = forward.dot(dirToTarget);
           if (math.in_range(dot, 0.9, 1.1)) {
+            // Record battle result to blockchain
+            const blockchainManager = this.GetComponent('BlockchainManager');
+            if (blockchainManager && blockchainManager.isConnected) {
+              // Generate a unique battle ID
+              const battleId = `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+              // Get the opponent name/id
+              const opponentId = target.Name;
+              const playerId = this._parent.Name;
+
+              // Calculate battle result (simplified: damage dealt vs taken)
+              // This would need to be extended based on actual health changes
+              const playerResult = 2; // Win for now
+              const damageDealt = damage;
+              const damageTaken = 0; // Would need to track from target's health decrease
+              const experienceGained = Math.floor(damage); // Simplified calculation
+
+              // Save battle record to blockchain
+              blockchainManager.recordBattle(
+                battleId,
+                playerId,
+                opponentId,
+                playerResult,
+                damageDealt,
+                damageTaken,
+                experienceGained
+              ).catch(err => {
+                console.error('Failed to record battle to blockchain:', err);
+              });
+            }
+
             target.Broadcast({
               topic: 'health.damage',
               value: damage,

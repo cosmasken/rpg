@@ -7,13 +7,12 @@ mod state;
 
 use rpg_game::{RpgGameAbi, RpgGameOperation, RpgGameMessage};
 use linera_sdk::{
-    linera_base_types::{WithContractAbi, ChainId},
+    linera_base_types::WithContractAbi,
     views::{RootView, View},
     Contract, ContractRuntime,
 };
 use serde_json;
 use state::{InventoryData, PlayerData, RpgGameState, BattleRecord, GuildData, PlayerTransferRequest};
-use log;
 
 pub struct RpgGameContract {
     state: RpgGameState,
@@ -43,7 +42,7 @@ impl Contract for RpgGameContract {
         // Validate that the application parameters were configured correctly.
         let params = self.runtime.application_parameters();
         if params.world_region != world_region {
-            log::warn!("World region parameter mismatch");
+            println!("World region parameter mismatch");
         }
 
         // Set the world region for this chain
@@ -75,7 +74,7 @@ impl Contract for RpgGameContract {
                 };
 
                 if let Err(e) = self.state.player_states.insert(&player_id, player_data) {
-                    log::error!("Failed to save player state to blockchain for player {}: {}", player_id, e);
+                    println!("Failed to save player state to blockchain for player {}: {}", player_id, e);
                 }
             }
             RpgGameOperation::SaveInventory { player_id, inventory } => {
@@ -84,7 +83,7 @@ impl Contract for RpgGameContract {
                     match serde_json::from_str(&inventory) {
                         Ok(data) => data,
                         Err(e) => {
-                            log::error!("Failed to parse inventory JSON for player {}: {}", player_id, e);
+                            println!("Failed to parse inventory JSON for player {}: {}", player_id, e);
                             return; // Exit the operation early if JSON parsing fails
                         }
                     };
@@ -94,7 +93,7 @@ impl Contract for RpgGameContract {
                 };
 
                 if let Err(e) = self.state.player_inventories.insert(&player_id, inventory_struct) {
-                    log::error!("Failed to save inventory to blockchain for player {}: {}", player_id, e);
+                    println!("Failed to save inventory to blockchain for player {}: {}", player_id, e);
                 }
             }
             RpgGameOperation::SaveQuests { player_id, quests } => {
@@ -103,13 +102,13 @@ impl Contract for RpgGameContract {
                     match serde_json::from_str(&quests) {
                         Ok(data) => data,
                         Err(e) => {
-                            log::error!("Failed to parse quests JSON for player {}: {}", player_id, e);
+                            println!("Failed to parse quests JSON for player {}: {}", player_id, e);
                             return; // Exit the operation early if JSON parsing fails
                         }
                     };
 
                 if let Err(e) = self.state.player_quests.insert(&player_id, quests_data) {
-                    log::error!("Failed to save quests to blockchain for player {}: {}", player_id, e);
+                    println!("Failed to save quests to blockchain for player {}: {}", player_id, e);
                 }
             }
             RpgGameOperation::TransferPlayer {
@@ -146,7 +145,7 @@ impl Contract for RpgGameContract {
                 };
 
                 if let Err(e) = self.state.player_transfer_requests.insert(&player_id, transfer_request) {
-                    log::error!("Failed to save player transfer request for player {}: {}", player_id, e);
+                    println!("Failed to save player transfer request for player {}: {}", player_id, e);
                 }
             }
             RpgGameOperation::JoinGuild {
@@ -172,7 +171,7 @@ impl Contract for RpgGameContract {
                     let mut requests = Vec::new();
                     requests.push(player_id);
                     if let Err(e) = self.state.guild_join_requests.insert(&guild_id, requests) {
-                        log::error!("Failed to save guild join request for guild {}: {}", guild_id, e);
+                        println!("Failed to save guild join request for guild {}: {}", guild_id, e);
                     }
                 }
             }
@@ -199,7 +198,7 @@ impl Contract for RpgGameContract {
 
                 // Save the battle record
                 if let Err(e) = self.state.battle_records.insert(&battle_id, battle_record) {
-                    log::error!("Failed to save battle record for battle {}: {}", battle_id, e);
+                    println!("Failed to save battle record for battle {}: {}", battle_id, e);
                 }
 
                 // Add to player's battle history
@@ -209,7 +208,7 @@ impl Contract for RpgGameContract {
                     let mut battles = Vec::new();
                     battles.push(battle_id.clone());
                     if let Err(e) = self.state.player_battles.insert(&player_id, battles) {
-                        log::error!("Failed to save player battle history for player {}: {}", player_id, e);
+                        println!("Failed to save player battle history for player {}: {}", player_id, e);
                     }
                 }
             }
@@ -242,7 +241,7 @@ impl Contract for RpgGameContract {
 
                 // Save the player state
                 if let Err(e) = self.state.player_states.insert(&player_id, player_data) {
-                    log::error!("Failed to save transferred player state for player {}: {}", player_id, e);
+                    println!("Failed to save transferred player state for player {}: {}", player_id, e);
                     return;
                 }
 
@@ -251,7 +250,7 @@ impl Contract for RpgGameContract {
                     match serde_json::from_str(&inventory) {
                         Ok(data) => data,
                         Err(e) => {
-                            log::error!("Failed to parse transferred inventory JSON for player {}: {}", player_id, e);
+                            println!("Failed to parse transferred inventory JSON for player {}: {}", player_id, e);
                             return;
                         }
                     };
@@ -261,7 +260,7 @@ impl Contract for RpgGameContract {
                 };
 
                 if let Err(e) = self.state.player_inventories.insert(&player_id, inventory_struct) {
-                    log::error!("Failed to save transferred inventory for player {}: {}", player_id, e);
+                    println!("Failed to save transferred inventory for player {}: {}", player_id, e);
                     return;
                 }
 
@@ -270,17 +269,17 @@ impl Contract for RpgGameContract {
                     match serde_json::from_str(&quests) {
                         Ok(data) => data,
                         Err(e) => {
-                            log::error!("Failed to parse transferred quests JSON for player {}: {}", player_id, e);
+                            println!("Failed to parse transferred quests JSON for player {}: {}", player_id, e);
                             return;
                         }
                     };
 
                 if let Err(e) = self.state.player_quests.insert(&player_id, quests_data) {
-                    log::error!("Failed to save transferred quests for player {}: {}", player_id, e);
+                    println!("Failed to save transferred quests for player {}: {}", player_id, e);
                     return;
                 }
 
-                log::info!("Player {} successfully transferred to this chain", player_id);
+                println!("Player {} successfully transferred to this chain", player_id);
             }
             RpgGameMessage::GuildJoinRequest {
                 player_id,
@@ -294,12 +293,12 @@ impl Contract for RpgGameContract {
 
                         // Also update the player's guild mapping
                         if let Err(e) = self.state.player_guilds.insert(&player_id, guild_id.clone()) {
-                            log::error!("Failed to update player guild mapping for player {}: {}", player_id, e);
+                            println!("Failed to update player guild mapping for player {}: {}", player_id, e);
                         }
 
-                        log::info!("Player {} joined guild {} on this chain", player_id, guild_id);
+                        println!("Player {} joined guild {} on this chain", player_id, guild_id);
                     } else {
-                        log::info!("Player {} is already in guild {}", player_id, guild_id);
+                        println!("Player {} is already in guild {}", player_id, guild_id);
                     }
                 } else {
                     // Guild doesn't exist on this chain, create a new one with the player
@@ -312,15 +311,15 @@ impl Contract for RpgGameContract {
                     };
 
                     if let Err(e) = self.state.guilds.insert(&guild_id, new_guild) {
-                        log::error!("Failed to create new guild {}: {}", guild_id, e);
+                        println!("Failed to create new guild {}: {}", guild_id, e);
                         return;
                     }
 
                     if let Err(e) = self.state.player_guilds.insert(&player_id, guild_id.clone()) {
-                        log::error!("Failed to update player guild mapping for player {}: {}", player_id, e);
+                        println!("Failed to update player guild mapping for player {}: {}", player_id, e);
                     }
 
-                    log::info!("Player {} joined new guild {} on this chain", player_id, guild_id);
+                    println!("Player {} joined new guild {} on this chain", player_id, guild_id);
                 }
             }
             RpgGameMessage::BattleResult {
@@ -345,7 +344,7 @@ impl Contract for RpgGameContract {
                 };
 
                 if let Err(e) = self.state.battle_records.insert(&battle_id, battle_record) {
-                    log::error!("Failed to save battle result for battle {}: {}", battle_id, e);
+                    println!("Failed to save battle result for battle {}: {}", battle_id, e);
                     return;
                 }
 
@@ -355,11 +354,11 @@ impl Contract for RpgGameContract {
                     let mut battles = Vec::new();
                     battles.push(battle_id.clone());
                     if let Err(e) = self.state.player_battles.insert(&player_id, battles) {
-                        log::error!("Failed to save player battle history for player {}: {}", player_id, e);
+                        println!("Failed to save player battle history for player {}: {}", player_id, e);
                     }
                 }
 
-                log::info!("Battle {} result recorded for player {}", battle_id, player_id);
+                println!("Battle {} result recorded for player {}", battle_id, player_id);
             }
         }
     }

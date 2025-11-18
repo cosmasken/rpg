@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 use async_graphql::{Request, Response};
-use linera_sdk::linera_base_types::{ContractAbi, ServiceAbi, ChainId, ApplicationId};
+use linera_sdk::linera_base_types::{ContractAbi, ServiceAbi, ChainId};
 use serde::{Deserialize, Serialize};
 
 pub struct RpgGameAbi;
