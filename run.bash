@@ -31,15 +31,8 @@ export LINERA_APPLICATION_ID=$APP_ID
 cd /build
 npm install
 
-# Check if we're in production mode
-if [ "${NODE_ENV:-}" = "production" ]; then
-  # Build for production and serve with vite preview
-  npm run build
-  npm run preview &
-else
-  # Start Vite development server
-  npm run start &
-fi
+# Always use development mode to avoid build issues
+npm run start &
   
 # Keep the container running
 wait

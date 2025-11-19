@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Linera Realms</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+French+Canon+SC&display=swap" rel="stylesheet">
+  <script type="importmap">
+    {
+      "imports": {
+        "@linera/client": "./node_modules/@linera/client/dist/linera_web.js"
+      }
+    }
+  </script>
+  <script type="module" crossorigin src="/assets/index-BOdYG5Y0.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CnJYlozU.css">
+</head>
+
+<body>
+  <!-- Import map for Linera client (will be used if available) -->
+
+
+  <div class="container" id="container">
+    <!-- Blockchain Status UI -->
+    <div class="ui">
+      <div class="blockchain-status">
+        <div class="status-item">
+          <span class="status-label">Blockchain:</span>
+          <span class="status-value" id="blockchain-status-text">Connecting...</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Chain ID:</span>
+          <span class="status-value" id="chain-id-text">-</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">World Region:</span>
+          <span class="status-value" id="world-region-text">-</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui">
+      <div class="quest-journal-layout">
+        <div class="quest-journal" id="quest-journal">
+        </div>
+      </div>
+    </div>
+    <div class="ui">
+      <div class="quest-ui-layout">
+        <div class="quest-ui" id="quest-ui">
+          <div class="quest-text-title" id="quest-text-title"></div>
+          <div class="quest-text" id="quest-text"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ui">
+      <div class="icon-ui">
+        <div class="icon-bar" id="icon-bar">
+          <div class="icon-bar-item" id="icon-bar-stats"
+            style="background-image: url('data:image/webp;base64,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');"></div>
+          <div class="icon-bar-item" id="icon-bar-inventory"
+            style="background-image: url('/assets/backpack-BYpd2AHB.webp');"></div>
+          <div class="icon-bar-item" id="icon-bar-quests"
+            style="background-image: url('/assets/tied-scroll-C9QQwtp6.webp');"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ui">
+      <div class="stats" id="stats">
+        <div class="stats-inner">
+          <div class="stats-title">Statistics</div>
+          <div class="stats-row">
+            <div class="stats-tooltip">Strength
+              <div class="stats-tooltiptext">How strong you are, affects how much damage you do. So blah blah if you're
+                doing stuff then its stronger or whatever, the damage is up. This is text to show the tooltip.</div>
+            </div>
+            <div id="stats-strength">0</div>
+          </div>
+          <div class="stats-row">
+            <div class="stats-tooltip">Wisdomness
+              <div class="stats-tooltiptext">Wisdom is the guage of something to do with wisdom in the game because
+                wisdom is important and wisdom is wise to wisdoming.</div>
+            </div>
+            <div id="stats-wisdomness">0</div>
+          </div>
+          <div class="stats-row">
+            <div class="stats-tooltip">Benchpress
+              <div class="stats-tooltiptext">Gotta have a good bench to be a warrior or something.</div>
+            </div>
+            <div id="stats-benchpress">0</div>
+          </div>
+          <div class="stats-row">
+            <div class="stats-tooltip">Curl
+              <div class="stats-tooltiptext">The ultimate expression of strength, this affects literally everything in
+                your life.</div>
+            </div>
+            <div id="stats-curl">0</div>
+          </div>
+          <div class="stats-row">
+            <div class="stats-tooltip">XP
+              <div class="stats-tooltiptext">How much xp you've accumulated by killing things for xp. Get enough and
+                you'll gain a level or something.</div>
+            </div>
+            <div id="stats-experience">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ui">
+      <div class="health-ui">
+        <div class="health-bar" id="health-bar"></div>
+      </div>
+    </div>
+    <div class="ui">
+      <div class="inventory" id="inventory">
+        <div class="inventory-inner">
+          <div class="inventory-title">Inventory</div>
+          <div class="inventory-row">
+            <div class="inventory-column">
+              <div class="inventory-item" id="inventory-equip-1" draggable="true"></div>
+              <div class="inventory-item" id="inventory-equip-2" draggable="true"></div>
+              <div class="inventory-item" id="inventory-equip-3" draggable="true"></div>
+              <div class="inventory-item" id="inventory-equip-4" draggable="true"></div>
+            </div>
+            <div class="inventory-character"></div>
+            <div class="inventory-column">
+              <div class="inventory-item" id="inventory-equip-5" draggable="true"></div>
+              <div class="inventory-item" id="inventory-equip-6" draggable="true"></div>
+              <div class="inventory-item" id="inventory-equip-7" draggable="true"></div>
+              <div class="inventory-item" id="inventory-equip-8" draggable="true"></div>
+            </div>
+          </div>
+          <div class="inventory-row">
+            <div class="inventory-item" id="inventory-1" draggable="true"></div>
+            <div class="inventory-item" id="inventory-2" draggable="true"></div>
+            <div class="inventory-item" id="inventory-3" draggable="true"></div>
+            <div class="inventory-item" id="inventory-4" draggable="true"></div>
+            <div class="inventory-item" id="inventory-5" draggable="true"></div>
+            <div class="inventory-item" id="inventory-6" draggable="true"></div>
+            <div class="inventory-item" id="inventory-7" draggable="true"></div>
+            <div class="inventory-item" id="inventory-8" draggable="true"></div>
+          </div>
+          <div class="inventory-row">
+            <div class="inventory-item" id="inventory-9" draggable="true"></div>
+            <div class="inventory-item" id="inventory-10" draggable="true"></div>
+            <div class="inventory-item" id="inventory-11" draggable="true"></div>
+            <div class="inventory-item" id="inventory-12" draggable="true"></div>
+            <div class="inventory-item" id="inventory-13" draggable="true"></div>
+            <div class="inventory-item" id="inventory-14" draggable="true"></div>
+            <div class="inventory-item" id="inventory-15" draggable="true"></div>
+            <div class="inventory-item" id="inventory-16" draggable="true"></div>
+          </div>
+          <div class="inventory-row">
+            <div class="inventory-item" id="inventory-17" draggable="true"></div>
+            <div class="inventory-item" id="inventory-18" draggable="true"></div>
+            <div class="inventory-item" id="inventory-19" draggable="true"></div>
+            <div class="inventory-item" id="inventory-20" draggable="true"></div>
+            <div class="inventory-item" id="inventory-21" draggable="true"></div>
+            <div class="inventory-item" id="inventory-22" draggable="true"></div>
+            <div class="inventory-item" id="inventory-23" draggable="true"></div>
+            <div class="inventory-item" id="inventory-24" draggable="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
