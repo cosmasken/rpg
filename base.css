@@ -141,7 +141,7 @@ body {
 }
 
 .health-ui {
-  background-image: url('./resources/icons/ui/health-bar.png');
+  background-image: url('./resources/icons/ui/health-bar.webp');
   width: 500px;
   height: 300px;
   z-index: 1;
@@ -254,7 +254,7 @@ body {
 }
 
 .inventory-character {
-  background-image: url('./resources/icons/ui/inventory-character.png');
+  background-image: url('./resources/icons/ui/inventory-character.webp');
   background-size: cover;
   width: 200px;
   height: 350px;
