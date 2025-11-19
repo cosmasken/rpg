@@ -27,9 +27,9 @@ echo "RPG Application deployed with ID: $APP_ID"
 # Export the application ID for the frontend
 export LINERA_APPLICATION_ID=$APP_ID
 
-# Start the frontend server
-cd ..
-http-server \
+# Start the frontend server from the root directory (where index.html is)
+cd /build
+http-server . \
   --port 5173 \
   --header Cross-Origin-Embedder-Policy:require-corp \
   --header Cross-Origin-Opener-Policy:same-origin &
