@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
+import * as THREE from '../libs/three.module.js';
 
 import {entity} from "./entity.js";
 
