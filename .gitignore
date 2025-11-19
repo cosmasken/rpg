@@ -7,9 +7,9 @@ SETUP.md
 *.md
 
 # VPS deployment files (personal use only)
-docker-compose.prod.yml
-Dockerfile.prod
-deploy.sh
+# docker-compose.prod.yml
+# Dockerfile.prod
+# deploy.sh
 .env.prod
 node_modules/
 TECH_DEBT.md
