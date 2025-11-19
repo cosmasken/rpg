@@ -234,7 +234,7 @@ class HackNSlashDemo {
         renderParams: {
           name: 'Axe',
           scale: 0.25,
-          icon: 'war-axe-64.png',
+          icon: 'war-axe-64.webp',
         },
     }));
     this._entityManager.Add(axe);
@@ -246,7 +246,7 @@ class HackNSlashDemo {
         renderParams: {
           name: 'Sword',
           scale: 0.25,
-          icon: 'pointy-sword-64.png',
+          icon: 'pointy-sword-64.webp',
         },
     }));
     this._entityManager.Add(sword);
