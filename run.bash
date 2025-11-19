@@ -32,7 +32,7 @@ cd /build
 npm install
 
 # Always use development mode to avoid build issues
-npm run start &
+npm run start -- --host 0.0.0.0 &
   
 # Keep the container running
 wait
