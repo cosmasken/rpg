@@ -27,12 +27,19 @@ echo "RPG Application deployed with ID: $APP_ID"
 # Export the application ID for the frontend
 export LINERA_APPLICATION_ID=$APP_ID
 
-# Start the frontend server from the root directory (where index.html is)
+# Install npm dependencies and start Vite server from the root directory
 cd /build
-http-server . \
-  --port 5173 \
-  --header Cross-Origin-Embedder-Policy:require-corp \
-  --header Cross-Origin-Opener-Policy:same-origin &
+npm install
+
+# Check if we're in production mode
+if [ "${NODE_ENV:-}" = "production" ]; then
+  # Build for production and serve with vite preview
+  npm run build
+  npm run preview &
+else
+  # Start Vite development server
+  npm run start &
+fi
   
 # Keep the container running
 wait

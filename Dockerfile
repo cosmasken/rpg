@@ -13,8 +13,7 @@ RUN cargo install --locked linera-service@0.15.6 linera-storage-service@0.15.6
 
 RUN apt-get install -y curl gnupg python3 python3-pip
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g http-server
+    && apt-get install -y nodejs
 
 WORKDIR /build
 

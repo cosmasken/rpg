@@ -11,3 +11,4 @@ docker-compose.prod.yml
 Dockerfile.prod
 deploy.sh
 .env.prod
+node_modules/
