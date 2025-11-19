@@ -6,7 +6,7 @@
 set -e
 
 PROJECT_NAME="rpg-game"
-DOMAIN="rp.paymebro.xyz"
+DOMAIN="rpg.paymebro.xyz"
 
 echo "🚀 Deploying RPG Game..."
 
