@@ -16,10 +16,11 @@
     "web3",
     "blockchain"
   ],
-  "author": "Akindo",
+  "author": "Cosmas",
   "license": "MIT",
   "dependencies": {
-    "@linera/client": "^0.15.3"
+    "@linera/client": "^0.15.3",
+    "cwebp": "^3.2.0"
   },
   "devDependencies": {
     "vite": "^7.2.2"

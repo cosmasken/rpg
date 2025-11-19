@@ -324,27 +324,27 @@ class HackNSlashDemo {
       const monsters = [
         {
           resourceName: 'Ghost.fbx',
-          resourceTexture: 'Ghost_Texture.png',
+          resourceTexture: 'Ghost_Texture.webp',
         },
         {
           resourceName: 'Alien.fbx',
-          resourceTexture: 'Alien_Texture.png',
+          resourceTexture: 'Alien_Texture.webp',
         },
         {
           resourceName: 'Skull.fbx',
-          resourceTexture: 'Skull_Texture.png',
+          resourceTexture: 'Skull_Texture.webp',
         },
         {
           resourceName: 'GreenDemon.fbx',
-          resourceTexture: 'GreenDemon_Texture.png',
+          resourceTexture: 'GreenDemon_Texture.webp',
         },
         {
           resourceName: 'Cyclops.fbx',
-          resourceTexture: 'Cyclops_Texture.png',
+          resourceTexture: 'Cyclops_Texture.webp',
         },
         {
           resourceName: 'Cactus.fbx',
-          resourceTexture: 'Cactus_Texture.png',
+          resourceTexture: 'Cactus_Texture.webp',
         },
       ];
       const m = monsters[math.rand_int(0, monsters.length - 1)];
