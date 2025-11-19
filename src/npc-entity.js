@@ -62,7 +62,10 @@ export const npc_entity = (() => {
       this._stateMachine = new NPCFSM(
           new player_entity.BasicCharacterControllerProxy(this._animations));
 
-      this._LoadModels();
+      // Defer model loading to avoid blocking startup
+      this._modelLoaded = false;
+      this._loadDelay = Math.random() * 3000; // Random delay 0-3 seconds
+      setTimeout(() => this._LoadModels(), this._loadDelay);
     }
 
     InitComponent() {
@@ -87,6 +90,7 @@ export const npc_entity = (() => {
       loader.load(this._params.resourceName, (glb) => {
         this._target = glb;
         this._params.scene.add(this._target);
+        this._modelLoaded = true; // Mark model as loaded
 
         this._target.scale.setScalar(0.025);
         this._target.position.copy(this._parent._position);
@@ -287,7 +291,8 @@ export const npc_entity = (() => {
     }
 
     Update(timeInSeconds) {
-      if (!this._stateMachine._currentState) {
+      // Don't update if model hasn't loaded yet
+      if (!this._modelLoaded || !this._stateMachine._currentState) {
         return;
       }
 

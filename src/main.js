@@ -157,7 +157,7 @@ class HackNSlashDemo {
   }
 
   _LoadClouds() {
-    for (let i = 0; i < 20; ++i) {
+    for (let i = 0; i < 10; ++i) { // Reduced from 20 to 10 for better performance
       const index = math.rand_int(1, 3);
     const pos = new THREE.Vector3(
         (Math.random() * 2.0 - 1.0) * 500,
@@ -180,7 +180,7 @@ class HackNSlashDemo {
   }
 
   _LoadFoliage() {
-    for (let i = 0; i < 100; ++i) {
+    for (let i = 0; i < 25; ++i) { // Reduced from 100 to 25 for better performance
       const names = [
           'CommonTree_Dead', 'CommonTree',
           'BirchTree', 'BirchTree_Dead',
@@ -320,7 +320,8 @@ class HackNSlashDemo {
             target: this._entityManager.Get('player')}));
     this._entityManager.Add(camera, 'player-camera');
 
-    for (let i = 0; i < 50; ++i) {
+    // Spawn initial monsters (reduced from 50 to 10 for faster loading)
+    for (let i = 0; i < 10; ++i) {
       const monsters = [
         {
           resourceName: 'Ghost.fbx',
@@ -382,6 +383,11 @@ class HackNSlashDemo {
           (Math.random() * 2 - 1) * 500));
       this._entityManager.Add(npc);
     }
+
+    // Progressive monster spawning system
+    this._spawnTimer = 0;
+    this._maxMonsters = 50;
+    this._currentMonsters = 10;
   }
 
   _OnWindowResize() {
@@ -420,7 +426,56 @@ class HackNSlashDemo {
 
     this._UpdateSun();
 
+    // Progressive monster spawning (add 1 monster every 5 minutes)
+    if (this._currentMonsters < this._maxMonsters) {
+      this._spawnTimer += timeElapsedS;
+      if (this._spawnTimer >= 300.0) { // 5 minutes = 300 seconds
+        this._SpawnMonster();
+        this._spawnTimer = 0;
+        this._currentMonsters++;
+      }
+    }
+
     this._entityManager.Update(timeElapsedS);
+  }
+
+  _SpawnMonster() {
+    const monsters = [
+      { resourceName: 'Ghost.fbx', resourceTexture: 'Ghost_Texture.webp' },
+      { resourceName: 'Alien.fbx', resourceTexture: 'Alien_Texture.webp' },
+      { resourceName: 'Skull.fbx', resourceTexture: 'Skull_Texture.webp' },
+      { resourceName: 'GreenDemon.fbx', resourceTexture: 'GreenDemon_Texture.webp' },
+      { resourceName: 'Cyclops.fbx', resourceTexture: 'Cyclops_Texture.webp' },
+      { resourceName: 'Cactus.fbx', resourceTexture: 'Cactus_Texture.webp' },
+    ];
+    const m = monsters[math.rand_int(0, monsters.length - 1)];
+
+    const npc = new entity.Entity();
+    npc.AddComponent(new npc_entity.NPCController({
+        camera: this._camera,
+        scene: this._scene,
+        resourceName: m.resourceName,
+        resourceTexture: m.resourceTexture,
+    }));
+    npc.AddComponent(new health_component.HealthComponent({
+        health: 50,
+        maxHealth: 50,
+        healthBar: health_bar.HealthBar,
+    }));
+    npc.AddComponent(new spatial_grid_controller.SpatialGridController({
+        grid: this._grid,
+    }));
+    npc.AddComponent(new attack_controller.AttackController({
+        timing: {
+          radius: 5,
+          speed: 3,
+        },
+    }));
+    npc.SetPosition(new THREE.Vector3(
+        (Math.random() * 2 - 1) * 500,
+        0,
+        (Math.random() * 2 - 1) * 500));
+    this._entityManager.Add(npc);
   }
 }
 
